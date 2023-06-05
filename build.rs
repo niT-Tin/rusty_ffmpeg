@@ -181,6 +181,30 @@ pub struct EnvVars {
 
 impl EnvVars {
     fn init() -> Self {
+        // usually path
+        let ffmpeg_include_dir = env::var("FFMPEG_INCLUDE_DIR")
+            .ok()
+            .or_else(|| {
+                env::set_var("FFMPEG_INCLUDE_DIR", "/usr/include");
+                Some(String::from("/usr/include"))
+            })
+            .map(|p| PathBuf::from(p));
+        let ffmpeg_dll_path = env::var("FFMPEG_DLL_PATH")
+            .ok()
+            .or_else(|| {
+                env::set_var("FFMPEG_DLL_PATH", "/usr/lib");
+                Some(String::from("/usr/lib"))
+            })
+            .map(|p| PathBuf::from(p));
+        let ffmpeg_pkg_config_path = env::var("FFMPEG_PKG_CONFIG_PATH")
+            .ok()
+            .or_else(|| {
+                env::set_var("FFMPEG_PKG_CONFIG_PATH", "/lib/pkgconfig");
+                Some(String::from("/lib/pkgconfig"))
+            })
+            .map(|p| PathBuf::from(p));
+        env::set_var("FFMPEG_DLL_PATH", "/usr/lib");
+        env::set_var("FFMPEG_PKG_CONFIG_PATH", "/lib/pkgconfig");
         println!("cargo:rerun-if-env-changed=DOCS_RS");
         println!("cargo:rerun-if-env-changed=OUT_DIR");
         println!("cargo:rerun-if-env-changed=FFMPEG_INCLUDE_DIR");
@@ -191,9 +215,9 @@ impl EnvVars {
         Self {
             docs_rs: env::var("DOCS_RS").ok(),
             out_dir: env::var("OUT_DIR").ok().map(remove_verbatim),
-            ffmpeg_include_dir: env::var("FFMPEG_INCLUDE_DIR").ok().map(remove_verbatim),
-            ffmpeg_dll_path: env::var("FFMPEG_DLL_PATH").ok().map(remove_verbatim),
-            ffmpeg_pkg_config_path: env::var("FFMPEG_PKG_CONFIG_PATH").ok().map(remove_verbatim),
+            ffmpeg_include_dir,
+            ffmpeg_dll_path,
+            ffmpeg_pkg_config_path,
             ffmpeg_libs_dir: env::var("FFMPEG_LIBS_DIR").ok().map(remove_verbatim),
             ffmpeg_binding_path: env::var("FFMPEG_BINDING_PATH").ok().map(remove_verbatim),
         }
