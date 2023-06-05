@@ -255,23 +255,26 @@ fn dynamic_linking(env_vars: &EnvVars) {
     let output_binding_path = &env_vars.out_dir.as_ref().unwrap().join("binding.rs");
 
     // Extract dll name and the dir the dll is in.
-    let (ffmpeg_dll_name, ffmpeg_dll_dir) = {
+    let ffmpeg_dll_dir = {
         let mut ffmpeg_dll_path = PathBuf::from(ffmpeg_dll_path);
         // Without extension.
-        let ffmpeg_dll_filename = ffmpeg_dll_path.file_stem().unwrap();
-        let ffmpeg_dll_name = if cfg!(target_os = "windows") {
-            ffmpeg_dll_filename
-        } else {
-            ffmpeg_dll_filename.trim_start_matches("lib")
-        }
-        .to_string();
+        // let ffmpeg_dll_filename = ffmpeg_dll_path.file_stem().unwrap();
+        // let ffmpeg_dll_name = if cfg!(target_os = "windows") {
+        //     ffmpeg_dll_filename
+        // } else {
+        //     ffmpeg_dll_filename.trim_start_matches("lib")
+        // }
+        // .to_string();
         // Remove file name.
         ffmpeg_dll_path.pop();
         let ffmpeg_dll_path = ffmpeg_dll_path.to_string();
-        (ffmpeg_dll_name, ffmpeg_dll_path)
+        ffmpeg_dll_path
     };
 
-    println!("cargo:rustc-link-lib=dylib={}", ffmpeg_dll_name);
+    for &s in LIBS.iter() {
+        println!("cargo:rustc-link-lib=dylib={}", s);
+    }
+    // println!("cargo:rustc-link-lib=dylib={}", ffmpeg_dll_name);
     println!("cargo:rustc-link-search=native={}", ffmpeg_dll_dir);
 
     if let Some(ffmpeg_binding_path) = env_vars.ffmpeg_binding_path.as_ref() {
